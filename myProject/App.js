@@ -1,9 +1,6 @@
-import { Text, View } from 'react-native';
+import React from 'react';
+import AuthNavigator from './src/navigation/AuthNavigator';
 
 export default function App() {
-  return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Hello, React Native with Expo!</Text>
-    </View>
-  );
+  return <AuthNavigator />;
 }
