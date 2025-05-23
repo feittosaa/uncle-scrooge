@@ -28,7 +28,6 @@ export default function App() {
     initializeDatabase();
   }, []);
 
-  // Tela de carregamento/erro enquanto o DB está sendo inicializado
   if (error) {
     return (
       <View style={styles.center}>
@@ -48,15 +47,11 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      {/*
-        Defina a rota inicial para "Welcome".
-        Se o usuário precisar fazer login ou registrar, ele começará por essa tela.
-      */}
       <Stack.Navigator initialRouteName="Welcome">
         <Stack.Screen
           name="Welcome"
           component={WelcomeScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false }} // Não mostra o cabeçalho nesta tela
         />
         <Stack.Screen
           name="Login"
@@ -71,7 +66,7 @@ export default function App() {
         <Stack.Screen
           name="Home"
           component={HomeScreen}
-          options={{ headerShown: false }}
+          options={{ headerShown: false }} // Oculta o cabeçalho na tela Home
         />
       </Stack.Navigator>
     </NavigationContainer>
