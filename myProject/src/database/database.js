@@ -16,19 +16,27 @@ export const initDB = async () => {
       );
     `);
     console.log('Tabela "users" criada ou já existe.');
+
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS account_records (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,          -- Chave estrangeira para a tabela users
+        quantia_gasta REAL NOT NULL,
+        nome_conta TEXT NOT NULL,
+        categoria TEXT NOT NULL,
+        data_registro TEXT NOT NULL,       -- Formato AAAA-MM-DD
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- Opcional: timestamp de criação
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+    `);
+    console.log('Tabela "account_records" criada ou já existe.');
+
   } catch (error) {
     console.error('Erro ao inicializar o banco de dados:', error);
     throw error;
   }
 };
 
-/**
- * Insere um novo usuário na tabela 'users'.
- * @param {string} nome O nome do usuário.
- * @param {string} email O email do usuário (deve ser único).
- * @param {string} senha A senha do usuário.
- * @returns {Promise<SQLite.SQLiteRunResult>}
- */
 export const insertUser = async (nome, email, senha) => {
   try {
     if (!db) {
@@ -42,21 +50,15 @@ export const insertUser = async (nome, email, senha) => {
     return result;
   } catch (error) {
     console.error('Erro ao inserir usuário:', error);
-    throw error; // Re-lança o erro
+    throw error;
   }
 };
 
-/**
- * Busca um usuário pelo email na tabela 'users'.
- * @param {string} email O email do usuário a ser buscado.
- * @returns {Promise<object | undefined>} O objeto do usuário se encontrado, ou undefined.
- */
 export const getUserByEmail = async (email) => {
   try {
     if (!db) {
       throw new Error('Banco de dados não inicializado. Chame initDB() primeiro.');
     }
-    // Usa db.getFirstAsync para buscar uma única linha de dados.
     const user = await db.getFirstAsync('SELECT * FROM users WHERE email = ?;', [email]);
     if (user) {
       console.log('Usuário encontrado:', user.nome);
@@ -66,14 +68,44 @@ export const getUserByEmail = async (email) => {
     return user;
   } catch (error) {
     console.error('Erro ao buscar usuário por email:', error);
-    throw error; // Re-lança o erro
+    throw error;
   }
 };
 
-/**
- * EXTRAS: Exemplo de como obter todos os usuários (opcional).
- * @returns {Promise<Array<object>>} Um array de objetos de usuários.
- */
+export const insertAccountRecord = async (userId, quantiaGasta, nomeConta, categoria, dataRegistro) => {
+  try {
+    if (!db) {
+      throw new Error('Banco de dados não inicializado. Chame initDB() primeiro.');
+    }
+    const result = await db.runAsync(
+      'INSERT INTO account_records (user_id, quantia_gasta, nome_conta, categoria, data_registro) VALUES (?, ?, ?, ?, ?);',
+      [userId, quantiaGasta, nomeConta, categoria, dataRegistro]
+    );
+    console.log('Registro de conta inserido com sucesso! ID:', result.lastInsertRowId);
+    return result;
+  } catch (error) {
+    console.error('Erro ao inserir registro de conta:', error);
+    throw error;
+  }
+};
+
+export const getAllAccountRecordsByUserId = async (userId) => {
+  try {
+    if (!db) {
+      throw new Error('Banco de dados não inicializado. Chame initDB() primeiro.');
+    }
+    const records = await db.getAllAsync(
+      'SELECT * FROM account_records WHERE user_id = ? ORDER BY data_registro DESC, created_at DESC;',
+      [userId]
+    );
+    console.log(`Registros de conta para o usuário ${userId}:`, records);
+    return records;
+  } catch (error) {
+    console.error('Erro ao buscar registros de conta:', error);
+    throw error;
+  }
+};
+
 export const getAllUsers = async () => {
   try {
     if (!db) {

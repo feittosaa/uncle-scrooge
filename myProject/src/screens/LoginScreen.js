@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet, Text, ActivityIndicator } from 'react-native';
-import { getUserByEmail } from '../database/database'; // Ajuste o caminho conforme necessário
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { getUserByEmail } from '../database/database';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -23,8 +23,7 @@ export default function LoginScreen({ navigation }) {
         Alert.alert("Erro", "Senha incorreta.");
       } else {
         Alert.alert("Sucesso", `Bem-vindo, ${user.nome}!`);
-        // Usar navigation.replace para que o usuário não possa voltar para o login/registro
-        navigation.replace('Home', { nome: user.nome, email: user.email });
+        navigation.replace('Home', { nome: user.nome, email: user.email, userId: user.id });
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error);

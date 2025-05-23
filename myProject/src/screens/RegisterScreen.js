@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, Alert, StyleSheet, Text, ActivityIndicator } from 'react-native';
-import { insertUser, getUserByEmail } from '../database/database'; // Ajuste o caminho conforme necessário
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { getUserByEmail, insertUser } from '../database/database';
 
 export default function RegisterScreen({ navigation }) {
   const [nome, setNome] = useState('');
@@ -16,21 +16,26 @@ export default function RegisterScreen({ navigation }) {
 
     setLoading(true);
     try {
-      // Primeiro, verifica se o email já está cadastrado
       const existingUser = await getUserByEmail(email);
       if (existingUser) {
         Alert.alert("Erro", "Este email já está cadastrado.");
-        return; // Sai da função
+        return;
       }
 
-      // Se o email não existe, insere o novo usuário
-      await insertUser(nome, email, senha);
+      const result = await insertUser(nome, email, senha);
+      const newUserId = result.lastInsertRowId;
+
       Alert.alert("Sucesso", "Conta criada com sucesso!");
-      // Navega para a Home após o registro bem-sucedido
-      navigation.replace('Home', { nome, email });
+
+      navigation.replace('Home', { nome, email, userId: newUserId });
     } catch (error) {
       console.error("Erro ao registrar usuário:", error);
-      Alert.alert("Erro", "Ocorreu um erro ao criar a conta. Tente novamente.");
+      // Uma verificação adicional para erro de email duplicado, caso o DB retorne erro de UNIQUE constraint
+      if (error.message.includes('UNIQUE constraint failed')) {
+        Alert.alert("Erro", "Este email já está cadastrado.");
+      } else {
+        Alert.alert("Erro", "Ocorreu um erro ao criar a conta. Tente novamente.");
+      }
     } finally {
       setLoading(false);
     }
