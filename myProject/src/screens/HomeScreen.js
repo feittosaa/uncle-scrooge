@@ -1,9 +1,10 @@
-import React from 'react';
-import { View, Text, StyleSheet, Button, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen({ navigation, route }) {
   const nome = route.params?.nome || 'Usuário';
-  const email = route.params?.email || 'N/A'; // Adicionando o email
+  const email = route.params?.email || 'N/A';
+  const userId = route.params?.userId;
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Deseja realmente sair?', [
@@ -12,7 +13,6 @@ export default function HomeScreen({ navigation, route }) {
         text: 'Sair',
         style: 'destructive',
         onPress: () => {
-          // Usa navigation.replace para ir para a WelcomeScreen, limpando o histórico de navegação
           navigation.replace('Welcome');
         },
       },
@@ -21,10 +21,40 @@ export default function HomeScreen({ navigation, route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Bem-vindo, {nome}!</Text>
+      <View style={styles.header}>
+        <Text style={styles.welcomeText}>Bem-vindo, {nome}!</Text>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Ionicons name="log-out" size={24} color="#fff" />
+          <Text style={styles.logoutButtonText}>Sair</Text>
+        </TouchableOpacity>
+      </View>
+
       <Text style={styles.emailText}>Email: {email}</Text>
-      <View style={styles.buttonContainer}>
-        <Button title="Logout" onPress={handleLogout} />
+
+      <View style={styles.mainButtonsContainer}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('Record', { userId: userId })}
+        >
+          <Ionicons name="add-circle-outline" size={40} color="#fff" />
+          <Text style={styles.actionButtonText}>Registrar Conta</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('AccountList', { userId: userId })}
+        >
+          <Ionicons name="list-outline" size={40} color="#fff" />
+          <Text style={styles.actionButtonText}>Ver Registros</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('Dashboard')}
+        >
+          <Ionicons name="bar-chart-outline" size={40} color="#fff" />
+          <Text style={styles.actionButtonText}>Dashboard</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -33,26 +63,65 @@ export default function HomeScreen({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
-    backgroundColor: '#e0f7fa',
+    backgroundColor: '#f5f5f5',
   },
-  text: {
-    fontSize: 26,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 30,
+    paddingTop: 20,
+  },
+  welcomeText: {
+    fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#00796b',
-    textAlign: 'center',
+    color: '#2c3e50',
+    flexShrink: 1,
+  },
+  logoutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#e74c3c',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 25,
+    marginLeft: 15,
+  },
+  logoutButtonText: {
+    color: '#fff',
+    marginLeft: 5,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   emailText: {
     fontSize: 18,
-    marginBottom: 30,
-    color: '#4caf50',
-    textAlign: 'center',
+    color: '#7f8c8d',
+    marginBottom: 50,
   },
-  buttonContainer: {
-    marginTop: 20,
-    width: '60%',
-  }
+  mainButtonsContainer: {
+    flex: 1,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+  },
+  actionButton: {
+    backgroundColor: '#3498db',
+    width: '80%',
+    paddingVertical: 20,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginBottom: 20,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
 });

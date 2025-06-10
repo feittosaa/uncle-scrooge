@@ -1,15 +1,18 @@
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import 'react-native-gesture-handler';
 import { initDB } from './src/database/database';
+import AccountListScreen from './src/screens/AccountListScreen';
+import DashboardScreen from './src/screens/DashboardScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
+import RecordScreen from './src/screens/RecordScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import WelcomeScreen from './src/screens/WelcomeScreen';
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   const [dbInitialized, setDbInitialized] = useState(false);
@@ -28,7 +31,6 @@ export default function App() {
     initializeDatabase();
   }, []);
 
-  // Tela de carregamento/erro enquanto o DB está sendo inicializado
   if (error) {
     return (
       <View style={styles.center}>
@@ -48,10 +50,6 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      {/*
-        Defina a rota inicial para "Welcome".
-        Se o usuário precisar fazer login ou registrar, ele começará por essa tela.
-      */}
       <Stack.Navigator initialRouteName="Welcome">
         <Stack.Screen
           name="Welcome"
@@ -72,6 +70,21 @@ export default function App() {
           name="Home"
           component={HomeScreen}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Record"
+          component={RecordScreen}
+          options={{ title: 'Registrar Nova Conta' }}
+        />
+        <Stack.Screen
+          name="AccountList"
+          component={AccountListScreen}
+          options={{ title: 'Meus Registros' }}
+        />
+        <Stack.Screen
+          name="Dashboard"
+          component={DashboardScreen}
+          options={{ title: 'Dashboard' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
