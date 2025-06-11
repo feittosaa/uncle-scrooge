@@ -17,7 +17,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "jsEngine": "jsc"
+      "jsEngine": "jsc",
+      "package": "com.feittosaa.myProject"
     },
     "web": {
       "favicon": "./assets/icon.png"
@@ -32,6 +33,11 @@
           "backgroundColor": "#ffffff"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "3bba351f-2012-43a1-92e8-7c2c72c780da"
+      }
+    }
   }
 }
