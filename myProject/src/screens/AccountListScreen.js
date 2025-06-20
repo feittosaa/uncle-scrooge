@@ -1,7 +1,8 @@
-import { useFocusEffect, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
-import { getAllAccountRecordsByUserId } from '../database/database';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { deleteAccountRecordById, getAllAccountRecordsByUserId } from '../database/database';
 
 export default function AccountListScreen() {
   const route = useRoute();
@@ -11,6 +12,36 @@ export default function AccountListScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
+
+  const navigation = useNavigation();
+
+  const handleDelete = (id) => {
+    Alert.alert(
+      "Confirmar Exclusão",
+      "Tem certeza que deseja excluir este registro?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Excluir",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteAccountRecordById(id);
+              Alert.alert("Sucesso", "Registro excluído.");
+              loadRecords(); // Recarrega a lista
+            } catch (error) {
+              console.error("Erro ao deletar registro:", error);
+              Alert.alert("Erro", "Falha ao excluir o registro.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const handleEdit = (item) => {
+    navigation.navigate('EditRecord', { record: item, userId: userId });
+  };
 
   const loadRecords = useCallback(async () => {
     if (!userId) {
@@ -74,6 +105,22 @@ export default function AccountListScreen() {
       <Text style={styles.recordDetail}>Quantia: R$ {item.quantia_gasta?.toFixed(2) || '0.00'}</Text>
       <Text style={styles.recordDetail}>Categoria: {item.categoria}</Text>
       <Text style={styles.recordDetail}>Data: {item.data_registro}</Text>
+
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={[styles.button, styles.editButton]}
+          onPress={() => handleEdit(item)}
+        >
+          <Text style={styles.buttonText}>Editar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.button, styles.deleteButton]}
+          onPress={() => handleDelete(item.id)}
+        >
+          <Text style={styles.buttonText}>Excluir</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -159,5 +206,27 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#888',
     marginTop: 50,
-  }
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  button: {
+    flex: 1,
+    padding: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  editButton: {
+    backgroundColor: '#4CAF50',
+  },
+  deleteButton: {
+    backgroundColor: '#F44336',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 });

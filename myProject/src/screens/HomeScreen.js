@@ -34,7 +34,7 @@ export default function HomeScreen({ navigation, route }) {
       <View style={styles.mainButtonsContainer}>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => navigation.navigate('Record', { userId: userId })}
+          onPress={() => navigation.navigate('Record', { userId })}
         >
           <Ionicons name="add-circle-outline" size={40} color="#fff" />
           <Text style={styles.actionButtonText}>Registrar Conta</Text>
@@ -42,7 +42,7 @@ export default function HomeScreen({ navigation, route }) {
 
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => navigation.navigate('AccountList', { userId: userId })}
+          onPress={() => navigation.navigate('AccountList', { userId })}
         >
           <Ionicons name="list-outline" size={40} color="#fff" />
           <Text style={styles.actionButtonText}>Ver Registros</Text>
@@ -54,6 +54,15 @@ export default function HomeScreen({ navigation, route }) {
         >
           <Ionicons name="bar-chart-outline" size={40} color="#fff" />
           <Text style={styles.actionButtonText}>Dashboard</Text>
+        </TouchableOpacity>
+
+        {/* Novo botão para Metas */}
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => navigation.navigate('Goals', { userId })}
+        >
+          <Ionicons name="trophy-outline" size={40} color="#fff" />
+          <Text style={styles.actionButtonText}>Metas de Gasto</Text>
         </TouchableOpacity>
       </View>
     </View>

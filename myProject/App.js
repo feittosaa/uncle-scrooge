@@ -3,9 +3,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { initDB } from './src/database/database';
 import AccountListScreen from './src/screens/AccountListScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
+import EditRecordScreen from './src/screens/EditRecordScreen';
+import GoalScreen from './src/screens/GoalScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RecordScreen from './src/screens/RecordScreen';
@@ -49,45 +52,57 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen
-          name="Welcome"
-          component={WelcomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ title: 'Login de Usuário' }}
-        />
-        <Stack.Screen
-          name="Register"
-          component={RegisterScreen}
-          options={{ title: 'Registrar Nova Conta' }}
-        />
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Record"
-          component={RecordScreen}
-          options={{ title: 'Registrar Nova Conta' }}
-        />
-        <Stack.Screen
-          name="AccountList"
-          component={AccountListScreen}
-          options={{ title: 'Meus Registros' }}
-        />
-        <Stack.Screen
-          name="Dashboard"
-          component={DashboardScreen}
-          options={{ title: 'Dashboard' }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Welcome">
+          <Stack.Screen
+            name="Welcome"
+            component={WelcomeScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ title: 'Login de Usuário' }}
+          />
+          <Stack.Screen
+            name="Register"
+            component={RegisterScreen}
+            options={{ title: 'Registrar Nova Conta' }}
+          />
+          <Stack.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Record"
+            component={RecordScreen}
+            options={{ title: 'Registrar Nova Conta' }}
+          />
+          <Stack.Screen
+            name="AccountList"
+            component={AccountListScreen}
+            options={{ title: 'Meus Registros' }}
+          />
+          <Stack.Screen
+            name="Dashboard"
+            component={DashboardScreen}
+            options={{ title: 'Dashboard' }}
+          />
+          <Stack.Screen
+            name="EditRecord"
+            component={EditRecordScreen}
+            options={{ title: 'Editar Registro' }}
+          />
+          <Stack.Screen
+            name="Goals"
+            component={GoalScreen}
+            options={{ title: 'Metas' }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
 

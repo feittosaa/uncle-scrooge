@@ -59,7 +59,7 @@ export default function LoginScreen({ navigation }) {
         />
       </View>
       <View style={styles.registerPrompt}>
-        <Text>Não tem uma conta?</Text>
+        <Text style={styles.noAccountText}>Não tem uma conta?</Text>
         <Button title="Registrar-se" onPress={() => navigation.navigate('Register')} />
       </View>
       {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />}
@@ -95,10 +95,12 @@ const styles = StyleSheet.create({
     width: '90%',
     marginTop: 10,
   },
+  noAccountText: {
+    marginBottom: 10,
+  },
   registerPrompt: {
-    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 15,
   },
   loadingIndicator: {
     marginTop: 20,

@@ -1,16 +1,17 @@
 import { useRoute } from '@react-navigation/native';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import { insertAccountRecord } from '../database/database';
 
 export default function RecordScreen() {
-  const route = useRoute(); // Hook para acessar os parâmetros da rota
-  const userId = route.params?.userId; // Obtém o userId passado pela navegação
+  const route = useRoute();
+  const userId = route.params?.userId;
 
   const [quantiaGasta, setQuantiaGasta] = useState('');
   const [nomeConta, setNomeConta] = useState('');
-  const [categoria, setCategoria] = useState('');
-  const [data, setData] = useState(new Date().toISOString().split('T')[0]); // Data atual no formato YYYY-MM-DD
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [data, setData] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
 
   const handleRecord = async () => {
@@ -18,24 +19,24 @@ export default function RecordScreen() {
       Alert.alert("Erro", "ID do usuário não encontrado. Por favor, faça login novamente.");
       return;
     }
-    if (!quantiaGasta || !nomeConta || !categoria) {
-      Alert.alert("Erro", "Por favor, preencha todos os campos obrigatórios.");
+    if (!quantiaGasta || !nomeConta || selectedCategories.length === 0 || selectedCategories[0] === "") {
+      Alert.alert("Erro", "Por favor, preencha todos os campos e selecione uma categoria.");
       return;
     }
 
-    // Validação básica da quantia (opcional, mas recomendado)
-    const parsedQuantia = parseFloat(quantiaGasta.replace(',', '.')); // Garante ponto como separador decimal
+    const parsedQuantia = parseFloat(quantiaGasta.replace(',', '.'));
     if (isNaN(parsedQuantia) || parsedQuantia <= 0) {
       Alert.alert("Erro", "A quantia gasta deve ser um número válido e positivo.");
       return;
     }
 
-    // Validação básica da data (opcional)
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!data.match(dateRegex)) {
       Alert.alert("Erro", "Formato de data inválido. Use AAAA-MM-DD.");
       return;
     }
+
+    const categoriasString = selectedCategories[0];
 
     setLoading(true);
     try {
@@ -43,16 +44,16 @@ export default function RecordScreen() {
         userId,
         parsedQuantia,
         nomeConta,
-        categoria,
+        categoriasString,
         data
       );
 
       Alert.alert("Sucesso", "Conta registrada com sucesso!");
 
-      // Limpar campos após registro
+      // Limpar campos
       setQuantiaGasta('');
       setNomeConta('');
-      setCategoria('');
+      setSelectedCategories([]);
       setData(new Date().toISOString().split('T')[0]);
     } catch (error) {
       console.error("Erro ao registrar conta:", error);
@@ -84,19 +85,26 @@ export default function RecordScreen() {
       />
 
       <Text style={styles.label}>Categoria:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ex: Moradia, Alimentação, Lazer"
-        value={categoria}
-        onChangeText={setCategoria}
-      />
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={selectedCategories[0] || ""}
+          onValueChange={(itemValue) => setSelectedCategories([itemValue])}
+          style={styles.picker}
+        >
+          <Picker.Item label="Selecione uma categoria" value="" />
+          <Picker.Item label="Alimentação" value="Alimentação" />
+          <Picker.Item label="Saúde" value="Saúde" />
+          <Picker.Item label="Transporte" value="Transporte" />
+          <Picker.Item label="Lazer" value="Lazer" />
+        </Picker>
+      </View>
 
       <Text style={styles.label}>Data:</Text>
       <TextInput
         style={styles.input}
         placeholder="AAAA-MM-DD"
         value={data}
-        onChangeText={text => setData(text)}
+        onChangeText={setData}
       />
 
       <View style={styles.buttonContainer}>
@@ -116,7 +124,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 20,
     backgroundColor: '#f9f9f9',
-    alignItems: 'center',
+    alignItems: 'center'
   },
   title: {
     fontSize: 26,
@@ -148,5 +156,17 @@ const styles = StyleSheet.create({
   },
   loadingIndicator: {
     marginTop: 20,
+  },
+  pickerContainer: {
+    width: '90%',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 20,
+    backgroundColor: '#fff',
+  },
+  picker: {
+    width: '100%',
+    height: 50,
   },
 });
