@@ -7,12 +7,13 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { initDB } from './src/database/database';
 import AccountListScreen from './src/screens/AccountListScreen';
 import DashboardScreen from './src/screens/DashboardScreen';
+import EditRecordScreen from './src/screens/EditRecordScreen';
+import GoalScreen from './src/screens/GoalScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import RecordScreen from './src/screens/RecordScreen';
 import RegisterScreen from './src/screens/RegisterScreen';
 import WelcomeScreen from './src/screens/WelcomeScreen';
-import EditRecordScreen from './src/screens/EditRecordScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -93,6 +94,11 @@ export default function App() {
             name="EditRecord"
             component={EditRecordScreen}
             options={{ title: 'Editar Registro' }}
+          />
+          <Stack.Screen
+            name="Goals"
+            component={GoalScreen}
+            options={{ title: 'Metas' }}
           />
         </Stack.Navigator>
       </NavigationContainer>

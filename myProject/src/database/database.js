@@ -20,16 +20,18 @@ export const initDB = async () => {
     await db.execAsync(`
       CREATE TABLE IF NOT EXISTS account_records (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER NOT NULL,          -- Chave estrangeira para a tabela users
+        user_id INTEGER NOT NULL,
         quantia_gasta REAL NOT NULL,
         nome_conta TEXT NOT NULL,
         categoria TEXT NOT NULL,
-        data_registro TEXT NOT NULL,       -- Formato AAAA-MM-DD
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- Opcional: timestamp de criação
+        data_registro TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
       );
     `);
     console.log('Tabela "account_records" criada ou já existe.');
+
+    await createGoalsTable();
 
   } catch (error) {
     console.error('Erro ao inicializar o banco de dados:', error);
@@ -149,4 +151,52 @@ export const updateAccountRecord = async (id, userId, quantia, nome, categoria, 
     console.error('Erro ao atualizar registro:', error);
     throw error;
   }
+};
+
+export const createGoalsTable = async () => {
+  try {
+    if (!db) throw new Error('Banco de dados não inicializado.');
+
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS goals (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        categoria TEXT NOT NULL,
+        valor_meta REAL NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+    `);
+    console.log('Tabela "goals" criada ou já existe.');
+  } catch (error) {
+    console.error('Erro ao criar tabela goals:', error);
+  }
+};
+
+export const insertGoal = async (userId, categoria, valorMeta) => {
+  if (!db) throw new Error('Banco de dados não inicializado.');
+  return db.runAsync(
+    'INSERT INTO goals (user_id, categoria, valor_meta) VALUES (?, ?, ?);',
+    [userId, categoria, valorMeta]
+  );
+};
+
+export const getGoalsByUserId = async (userId) => {
+  if (!db) throw new Error('Banco de dados não inicializado.');
+  return db.getAllAsync(
+    'SELECT * FROM goals WHERE user_id = ?;',
+    [userId]
+  );
+};
+
+export const updateGoal = async (id, categoria, valorMeta) => {
+  if (!db) throw new Error('Banco de dados não inicializado.');
+  return db.runAsync(
+    'UPDATE goals SET categoria = ?, valor_meta = ? WHERE id = ?;',
+    [categoria, valorMeta, id]
+  );
+};
+
+export const deleteGoal = async (id) => {
+  if (!db) throw new Error('Banco de dados não inicializado.');
+  return db.runAsync('DELETE FROM goals WHERE id = ?;', [id]);
 };
