@@ -119,3 +119,34 @@ export const getAllUsers = async () => {
     throw error;
   }
 };
+
+export const deleteAccountRecordById = async (id) => {
+  try {
+    if (!db) {
+      throw new Error('Banco de dados não inicializado. Chame initDB() primeiro.');
+    }
+    await db.runAsync('DELETE FROM account_records WHERE id = ?;', [id]);
+    console.log(`Registro com ID ${id} deletado com sucesso.`);
+  } catch (error) {
+    console.error('Erro ao deletar registro:', error);
+    throw error;
+  }
+};
+
+export const updateAccountRecord = async (id, userId, quantia, nome, categoria, data) => {
+  try {
+    if (!db) {
+      throw new Error('Banco de dados não inicializado. Chame initDB() primeiro.');
+    }
+    await db.runAsync(
+      `UPDATE account_records
+       SET user_id = ?, quantia_gasta = ?, nome_conta = ?, categoria = ?, data_registro = ?
+       WHERE id = ?;`,
+      [userId, quantia, nome, categoria, data, id]
+    );
+    console.log(`Registro com ID ${id} atualizado com sucesso.`);
+  } catch (error) {
+    console.error('Erro ao atualizar registro:', error);
+    throw error;
+  }
+};
