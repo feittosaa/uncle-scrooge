@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { updateAccountRecord } from '../database/database';
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useState } from 'react';
+import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import { updateAccountRecord } from '../database/database';
+import { categories } from './RecordScreen';
 
 export default function EditRecordScreen() {
   const route = useRoute();
@@ -14,8 +15,6 @@ export default function EditRecordScreen() {
   const [nome, setNome] = useState(record.nome_conta);
   const [categoria, setCategoria] = useState(record.categoria);
   const [data, setData] = useState(record.data_registro);
-
-  const categories = ['Alimentação', 'Saúde', 'Transporte', 'Lazer'];
 
   const handleUpdate = async () => {
     if (!quantia || !nome || !categoria || !data) {

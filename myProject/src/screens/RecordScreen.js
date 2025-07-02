@@ -1,8 +1,10 @@
-import { useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useRoute } from '@react-navigation/native';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { insertAccountRecord } from '../database/database';
+
+export const categories = ['Alimentação', 'Saúde', 'Transporte', 'Lazer', 'Outros'];
 
 export default function RecordScreen() {
   const route = useRoute();
@@ -91,11 +93,9 @@ export default function RecordScreen() {
           onValueChange={(itemValue) => setSelectedCategories([itemValue])}
           style={styles.picker}
         >
-          <Picker.Item label="Selecione uma categoria" value="" />
-          <Picker.Item label="Alimentação" value="Alimentação" />
-          <Picker.Item label="Saúde" value="Saúde" />
-          <Picker.Item label="Transporte" value="Transporte" />
-          <Picker.Item label="Lazer" value="Lazer" />
+          {categories.map((cat) => (
+            <Picker.Item key={cat} label={cat} value={cat} />
+          ))}
         </Picker>
       </View>
 
