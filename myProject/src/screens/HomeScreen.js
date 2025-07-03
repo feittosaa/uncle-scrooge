@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 
 export default function HomeScreen({ navigation, route }) {
   const nome = route.params?.nome || 'Usuário';
@@ -20,52 +21,45 @@ export default function HomeScreen({ navigation, route }) {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.welcomeText}>Bem-vindo, {nome}!</Text>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Ionicons name="log-out" size={24} color="#fff" />
-          <Text style={styles.logoutButtonText}>Sair</Text>
-        </TouchableOpacity>
+    <KeyboardAvoidingWrapper>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.welcomeText}>Bem-vindo, {nome}!</Text>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Ionicons name="log-out" size={24} color="#fff" />
+            <Text style={styles.logoutButtonText}>Sair</Text>
+          </TouchableOpacity>
+        </View>
+
+        <Text style={styles.emailText}>Email: {email}</Text>
+
+        <View style={styles.mainButtonsContainer}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => navigation.navigate('Record', { userId })}
+          >
+            <Ionicons name="add-circle-outline" size={40} color="#fff" />
+            <Text style={styles.actionButtonText}>Registrar Conta</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => navigation.navigate('AccountList', { userId })}
+          >
+            <Ionicons name="list-outline" size={40} color="#fff" />
+            <Text style={styles.actionButtonText}>Ver Registros</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => navigation.navigate('Goals', { userId })}
+          >
+            <Ionicons name="trophy-outline" size={40} color="#fff" />
+            <Text style={styles.actionButtonText}>Metas de Gasto</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-
-      <Text style={styles.emailText}>Email: {email}</Text>
-
-      <View style={styles.mainButtonsContainer}>
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => navigation.navigate('Record', { userId })}
-        >
-          <Ionicons name="add-circle-outline" size={40} color="#fff" />
-          <Text style={styles.actionButtonText}>Registrar Conta</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => navigation.navigate('AccountList', { userId })}
-        >
-          <Ionicons name="list-outline" size={40} color="#fff" />
-          <Text style={styles.actionButtonText}>Ver Registros</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => navigation.navigate('Dashboard')}
-        >
-          <Ionicons name="bar-chart-outline" size={40} color="#fff" />
-          <Text style={styles.actionButtonText}>Dashboard</Text>
-        </TouchableOpacity>
-
-        {/* Novo botão para Metas */}
-        <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => navigation.navigate('Goals', { userId })}
-        >
-          <Ionicons name="trophy-outline" size={40} color="#fff" />
-          <Text style={styles.actionButtonText}>Metas de Gasto</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </KeyboardAvoidingWrapper>
   );
 }
 

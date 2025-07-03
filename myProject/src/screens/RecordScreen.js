@@ -2,6 +2,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 import { insertAccountRecord } from '../database/database';
 
 const gastoCategories = ['Alimentação', 'Saúde', 'Transporte', 'Lazer', 'Outros'];
@@ -72,73 +73,75 @@ export default function RecordScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Registrar Receita/Gasto</Text>
+    <KeyboardAvoidingWrapper>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Registrar Receita/Gasto</Text>
 
-      <Text style={styles.label}>Tipo:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={tipo}
-          onValueChange={(value) => {
-            setTipo(value);
-            setCategoria('');
-          }}
-          style={styles.picker}
-        >
-          <Picker.Item label="Gasto" value="gasto" />
-          <Picker.Item label="Receita" value="receita" />
-        </Picker>
-      </View>
+        <Text style={styles.label}>Tipo:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={tipo}
+            onValueChange={(value) => {
+              setTipo(value);
+              setCategoria('');
+            }}
+            style={styles.picker}
+          >
+            <Picker.Item label="Gasto" value="gasto" />
+            <Picker.Item label="Receita" value="receita" />
+          </Picker>
+        </View>
 
-      <Text style={styles.label}>Quantia:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ex: 150.75"
-        keyboardType="numeric"
-        value={quantia}
-        onChangeText={setQuantia}
-      />
-
-      <Text style={styles.label}>Nome/Descrição:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ex: Salário, Aluguel, Supermercado"
-        value={nomeConta}
-        onChangeText={setNomeConta}
-      />
-
-      <Text style={styles.label}>Categoria:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={categoria}
-          onValueChange={(value) => setCategoria(value)}
-          style={styles.picker}
-        >
-          <Picker.Item label="Selecione uma categoria..." value="" />
-          {categorias.map((cat) => (
-            <Picker.Item key={cat} label={cat} value={cat} />
-          ))}
-        </Picker>
-      </View>
-
-      <Text style={styles.label}>Data:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="AAAA-MM-DD"
-        value={data}
-        onChangeText={setData}
-      />
-
-      <View style={styles.buttonContainer}>
-        <Button
-          title={loading ? "Registrando..." : "Registrar"}
-          onPress={handleRecord}
-          disabled={loading}
+        <Text style={styles.label}>Quantia:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: 150.75"
+          keyboardType="numeric"
+          value={quantia}
+          onChangeText={setQuantia}
         />
-      </View>
 
-      {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />}
-    </ScrollView>
+        <Text style={styles.label}>Nome/Descrição:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: Salário, Aluguel, Supermercado"
+          value={nomeConta}
+          onChangeText={setNomeConta}
+        />
+
+        <Text style={styles.label}>Categoria:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={categoria}
+            onValueChange={(value) => setCategoria(value)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Selecione uma categoria..." value="" />
+            {categorias.map((cat) => (
+              <Picker.Item key={cat} label={cat} value={cat} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Data:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="AAAA-MM-DD"
+          value={data}
+          onChangeText={setData}
+        />
+
+        <View style={styles.buttonContainer}>
+          <Button
+            title={loading ? "Registrando..." : "Registrar"}
+            onPress={handleRecord}
+            disabled={loading}
+          />
+        </View>
+
+        {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />}
+      </ScrollView>
+    </KeyboardAvoidingWrapper>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 import { getUserByEmail } from '../database/database';
 
 export default function LoginScreen({ navigation }) {
@@ -34,36 +35,38 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Fazer Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        secureTextEntry
-        value={senha}
-        onChangeText={setSenha}
-      />
-      <View style={styles.buttonContainer}>
-        <Button
-          title={loading ? "Carregando..." : "Entrar"}
-          onPress={handleLogin}
-          disabled={loading}
+    <KeyboardAvoidingWrapper>
+      <View style={styles.container}>
+        <Text style={styles.title}>Fazer Login</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
         />
+        <TextInput
+          style={styles.input}
+          placeholder="Senha"
+          secureTextEntry
+          value={senha}
+          onChangeText={setSenha}
+        />
+        <View style={styles.buttonContainer}>
+          <Button
+            title={loading ? "Carregando..." : "Entrar"}
+            onPress={handleLogin}
+            disabled={loading}
+          />
+        </View>
+        <View style={styles.registerPrompt}>
+          <Text style={styles.noAccountText}>Não tem uma conta?</Text>
+          <Button title="Registrar-se" onPress={() => navigation.navigate('Register')} />
+        </View>
+        {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />}
       </View>
-      <View style={styles.registerPrompt}>
-        <Text style={styles.noAccountText}>Não tem uma conta?</Text>
-        <Button title="Registrar-se" onPress={() => navigation.navigate('Register')} />
-      </View>
-      {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />}
-    </View>
+    </KeyboardAvoidingWrapper>
   );
 }
 

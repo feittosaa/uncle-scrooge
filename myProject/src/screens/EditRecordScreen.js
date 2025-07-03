@@ -2,6 +2,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useState } from 'react';
 import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 import { updateAccountRecord } from '../database/database';
 
 const gastoCategories = ['Alimentação', 'Saúde', 'Transporte', 'Lazer', 'Outros'];
@@ -50,61 +51,63 @@ export default function EditRecordScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Editar Registro</Text>
+    <KeyboardAvoidingWrapper>
+      <View style={styles.container}>
+        <Text style={styles.title}>Editar Registro</Text>
 
-      <Text>Tipo:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={tipo}
-          onValueChange={(value) => {
-            setTipo(value);
-            setCategoria('');
-          }}
-        >
-          <Picker.Item label="Gasto" value="gasto" />
-          <Picker.Item label="Receita" value="receita" />
-        </Picker>
+        <Text>Tipo:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={tipo}
+            onValueChange={(value) => {
+              setTipo(value);
+              setCategoria('');
+            }}
+          >
+            <Picker.Item label="Gasto" value="gasto" />
+            <Picker.Item label="Receita" value="receita" />
+          </Picker>
+        </View>
+
+        <Text>Quantia:</Text>
+        <TextInput
+          style={styles.input}
+          value={quantia}
+          keyboardType="numeric"
+          onChangeText={setQuantia}
+        />
+
+        <Text>Nome:</Text>
+        <TextInput
+          style={styles.input}
+          value={nome}
+          onChangeText={setNome}
+        />
+
+        <Text>Categoria:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={categoria}
+            onValueChange={(itemValue) => setCategoria(itemValue)}
+          >
+            <Picker.Item label="Selecione uma categoria" value="" />
+            {categorias.map((cat) => (
+              <Picker.Item key={cat} label={cat} value={cat} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text>Data:</Text>
+        <TextInput
+          style={styles.input}
+          value={data}
+          onChangeText={setData}
+          placeholder="AAAA-MM-DD"
+        />
+
+        <Button title="Salvar Alterações" onPress={handleUpdate} />
       </View>
-
-      <Text>Quantia:</Text>
-      <TextInput
-        style={styles.input}
-        value={quantia}
-        keyboardType="numeric"
-        onChangeText={setQuantia}
-      />
-
-      <Text>Nome:</Text>
-      <TextInput
-        style={styles.input}
-        value={nome}
-        onChangeText={setNome}
-      />
-
-      <Text>Categoria:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={categoria}
-          onValueChange={(itemValue) => setCategoria(itemValue)}
-        >
-          <Picker.Item label="Selecione uma categoria" value="" />
-          {categorias.map((cat) => (
-            <Picker.Item key={cat} label={cat} value={cat} />
-          ))}
-        </Picker>
-      </View>
-
-      <Text>Data:</Text>
-      <TextInput
-        style={styles.input}
-        value={data}
-        onChangeText={setData}
-        placeholder="AAAA-MM-DD"
-      />
-
-      <Button title="Salvar Alterações" onPress={handleUpdate} />
-    </View>
+    </KeyboardAvoidingWrapper>
   );
 }
 

@@ -6,7 +6,6 @@ import 'react-native-gesture-handler';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { initDB } from './src/database/database';
 import AccountListScreen from './src/screens/AccountListScreen';
-import DashboardScreen from './src/screens/DashboardScreen';
 import EditRecordScreen from './src/screens/EditRecordScreen';
 import GoalScreen from './src/screens/GoalScreen';
 import HomeScreen from './src/screens/HomeScreen';
@@ -84,11 +83,6 @@ export default function App() {
             name="AccountList"
             component={AccountListScreen}
             options={{ title: 'Meus Registros' }}
-          />
-          <Stack.Screen
-            name="Dashboard"
-            component={DashboardScreen}
-            options={{ title: 'Dashboard' }}
           />
           <Stack.Screen
             name="EditRecord"
