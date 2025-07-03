@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { updateAccountRecord } from '../database/database';
 import { Picker } from '@react-native-picker/picker';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useState } from 'react';
+import { Alert, Button, StyleSheet, Text, TextInput, View } from 'react-native';
+import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
+import { updateAccountRecord } from '../database/database';
+
+const gastoCategories = ['Alimentação', 'Saúde', 'Transporte', 'Lazer', 'Outros'];
+const receitaCategories = ['Salário', 'Renda Extra', 'Outros'];
 
 export default function EditRecordScreen() {
   const route = useRoute();
@@ -10,12 +14,17 @@ export default function EditRecordScreen() {
 
   const { record, userId } = route.params;
 
-  const [quantia, setQuantia] = useState(record.quantia_gasta.toString());
+  const isGastoInicial = record.quantia_gasta < 0;
+  const tipoInicial = isGastoInicial ? 'gasto' : 'receita';
+  const valorAbsoluto = Math.abs(record.quantia_gasta);
+
+  const [quantia, setQuantia] = useState(valorAbsoluto.toString());
   const [nome, setNome] = useState(record.nome_conta);
+  const [tipo, setTipo] = useState(tipoInicial);
   const [categoria, setCategoria] = useState(record.categoria);
   const [data, setData] = useState(record.data_registro);
 
-  const categories = ['Alimentação', 'Saúde', 'Transporte', 'Lazer'];
+  const categorias = tipo === 'gasto' ? gastoCategories : receitaCategories;
 
   const handleUpdate = async () => {
     if (!quantia || !nome || !categoria || !data) {
@@ -23,8 +32,16 @@ export default function EditRecordScreen() {
       return;
     }
 
+    const parsedQuantia = parseFloat(quantia.replace(',', '.'));
+    if (isNaN(parsedQuantia) || parsedQuantia <= 0) {
+      Alert.alert('Erro', 'A quantia deve ser um número positivo.');
+      return;
+    }
+
+    const valorFinal = tipo === 'gasto' ? -parsedQuantia : parsedQuantia;
+
     try {
-      await updateAccountRecord(record.id, userId, parseFloat(quantia), nome, categoria, data);
+      await updateAccountRecord(record.id, userId, valorFinal, nome, categoria, data);
       Alert.alert('Sucesso', 'Registro atualizado com sucesso!');
       navigation.goBack();
     } catch (error) {
@@ -34,47 +51,63 @@ export default function EditRecordScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Editar Registro</Text>
+    <KeyboardAvoidingWrapper>
+      <View style={styles.container}>
+        <Text style={styles.title}>Editar Registro</Text>
 
-      <Text>Quantia:</Text>
-      <TextInput
-        style={styles.input}
-        value={quantia}
-        keyboardType="numeric"
-        onChangeText={setQuantia}
-      />
+        <Text>Tipo:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={tipo}
+            onValueChange={(value) => {
+              setTipo(value);
+              setCategoria('');
+            }}
+          >
+            <Picker.Item label="Gasto" value="gasto" />
+            <Picker.Item label="Receita" value="receita" />
+          </Picker>
+        </View>
 
-      <Text>Nome:</Text>
-      <TextInput
-        style={styles.input}
-        value={nome}
-        onChangeText={setNome}
-      />
+        <Text>Quantia:</Text>
+        <TextInput
+          style={styles.input}
+          value={quantia}
+          keyboardType="numeric"
+          onChangeText={setQuantia}
+        />
 
-      <Text>Categoria:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={categoria}
-          onValueChange={(itemValue) => setCategoria(itemValue)}
-        >
-          <Picker.Item label="Selecione uma categoria" value="" />
-          {categories.map((cat) => (
-            <Picker.Item key={cat} label={cat} value={cat} />
-          ))}
-        </Picker>
+        <Text>Nome:</Text>
+        <TextInput
+          style={styles.input}
+          value={nome}
+          onChangeText={setNome}
+        />
+
+        <Text>Categoria:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={categoria}
+            onValueChange={(itemValue) => setCategoria(itemValue)}
+          >
+            <Picker.Item label="Selecione uma categoria" value="" />
+            {categorias.map((cat) => (
+              <Picker.Item key={cat} label={cat} value={cat} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text>Data:</Text>
+        <TextInput
+          style={styles.input}
+          value={data}
+          onChangeText={setData}
+          placeholder="AAAA-MM-DD"
+        />
+
+        <Button title="Salvar Alterações" onPress={handleUpdate} />
       </View>
-
-      <Text>Data:</Text>
-      <TextInput
-        style={styles.input}
-        value={data}
-        onChangeText={setData}
-        placeholder="AAAA-MM-DD"
-      />
-
-      <Button title="Salvar Alterações" onPress={handleUpdate} />
-    </View>
+    </KeyboardAvoidingWrapper>
   );
 }
 

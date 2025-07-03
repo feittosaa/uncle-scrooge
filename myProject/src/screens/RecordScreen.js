@@ -1,32 +1,40 @@
-import { useRoute } from '@react-navigation/native';
-import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useRoute } from '@react-navigation/native';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 import { insertAccountRecord } from '../database/database';
+
+const gastoCategories = ['Alimentação', 'Saúde', 'Transporte', 'Lazer', 'Outros'];
+const receitaCategories = ['Salário', 'Renda Extra', 'Outros'];
 
 export default function RecordScreen() {
   const route = useRoute();
   const userId = route.params?.userId;
 
-  const [quantiaGasta, setQuantiaGasta] = useState('');
+  const [quantia, setQuantia] = useState('');
   const [nomeConta, setNomeConta] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [tipo, setTipo] = useState('gasto'); // gasto ou receita
+  const [categoria, setCategoria] = useState('');
   const [data, setData] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
+
+  const categorias = tipo === 'gasto' ? gastoCategories : receitaCategories;
 
   const handleRecord = async () => {
     if (!userId) {
       Alert.alert("Erro", "ID do usuário não encontrado. Por favor, faça login novamente.");
       return;
     }
-    if (!quantiaGasta || !nomeConta || selectedCategories.length === 0 || selectedCategories[0] === "") {
-      Alert.alert("Erro", "Por favor, preencha todos os campos e selecione uma categoria.");
+
+    if (!quantia || !nomeConta || !categoria) {
+      Alert.alert("Erro", "Por favor, preencha todos os campos.");
       return;
     }
 
-    const parsedQuantia = parseFloat(quantiaGasta.replace(',', '.'));
+    const parsedQuantia = parseFloat(quantia.replace(',', '.'));
     if (isNaN(parsedQuantia) || parsedQuantia <= 0) {
-      Alert.alert("Erro", "A quantia gasta deve ser um número válido e positivo.");
+      Alert.alert("Erro", "A quantia deve ser um número positivo.");
       return;
     }
 
@@ -36,86 +44,104 @@ export default function RecordScreen() {
       return;
     }
 
-    const categoriasString = selectedCategories[0];
+    const valorFinal = tipo === 'gasto' ? -parsedQuantia : parsedQuantia;
 
     setLoading(true);
     try {
       await insertAccountRecord(
         userId,
-        parsedQuantia,
+        valorFinal,
         nomeConta,
-        categoriasString,
+        categoria,
         data
       );
 
-      Alert.alert("Sucesso", "Conta registrada com sucesso!");
+      Alert.alert("Sucesso", "Registro adicionado com sucesso!");
 
       // Limpar campos
-      setQuantiaGasta('');
+      setQuantia('');
       setNomeConta('');
-      setSelectedCategories([]);
+      setCategoria('');
+      setTipo('gasto');
       setData(new Date().toISOString().split('T')[0]);
     } catch (error) {
-      console.error("Erro ao registrar conta:", error);
-      Alert.alert("Erro", "Ocorreu um erro ao registrar a conta. Tente novamente.");
+      console.error("Erro ao registrar:", error);
+      Alert.alert("Erro", "Não foi possível registrar. Tente novamente.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Registrar Nova Conta</Text>
+    <KeyboardAvoidingWrapper>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Registrar Receita/Gasto</Text>
 
-      <Text style={styles.label}>Quantia Gasta:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ex: 150.75"
-        keyboardType="numeric"
-        value={quantiaGasta}
-        onChangeText={setQuantiaGasta}
-      />
+        <Text style={styles.label}>Tipo:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={tipo}
+            onValueChange={(value) => {
+              setTipo(value);
+              setCategoria('');
+            }}
+            style={styles.picker}
+          >
+            <Picker.Item label="Gasto" value="gasto" />
+            <Picker.Item label="Receita" value="receita" />
+          </Picker>
+        </View>
 
-      <Text style={styles.label}>Nome/Descrição:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Ex: Aluguel, Supermercado, Cinema"
-        value={nomeConta}
-        onChangeText={setNomeConta}
-      />
-
-      <Text style={styles.label}>Categoria:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={selectedCategories[0] || ""}
-          onValueChange={(itemValue) => setSelectedCategories([itemValue])}
-          style={styles.picker}
-        >
-          <Picker.Item label="Selecione uma categoria" value="" />
-          <Picker.Item label="Alimentação" value="Alimentação" />
-          <Picker.Item label="Saúde" value="Saúde" />
-          <Picker.Item label="Transporte" value="Transporte" />
-          <Picker.Item label="Lazer" value="Lazer" />
-        </Picker>
-      </View>
-
-      <Text style={styles.label}>Data:</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="AAAA-MM-DD"
-        value={data}
-        onChangeText={setData}
-      />
-
-      <View style={styles.buttonContainer}>
-        <Button
-          title={loading ? "Registrando..." : "Registrar Conta"}
-          onPress={handleRecord}
-          disabled={loading}
+        <Text style={styles.label}>Quantia:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: 150.75"
+          keyboardType="numeric"
+          value={quantia}
+          onChangeText={setQuantia}
         />
-      </View>
-      {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />}
-    </ScrollView>
+
+        <Text style={styles.label}>Nome/Descrição:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Ex: Salário, Aluguel, Supermercado"
+          value={nomeConta}
+          onChangeText={setNomeConta}
+        />
+
+        <Text style={styles.label}>Categoria:</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={categoria}
+            onValueChange={(value) => setCategoria(value)}
+            style={styles.picker}
+          >
+            <Picker.Item label="Selecione uma categoria..." value="" />
+            {categorias.map((cat) => (
+              <Picker.Item key={cat} label={cat} value={cat} />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={styles.label}>Data:</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="AAAA-MM-DD"
+          value={data}
+          onChangeText={setData}
+        />
+
+        <View style={styles.buttonContainer}>
+          <Button
+            title={loading ? "Registrando..." : "Registrar"}
+            onPress={handleRecord}
+            disabled={loading}
+          />
+        </View>
+
+        {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />}
+      </ScrollView>
+    </KeyboardAvoidingWrapper>
   );
 }
 
@@ -150,13 +176,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 16,
   },
-  buttonContainer: {
-    width: '90%',
-    marginTop: 20,
-  },
-  loadingIndicator: {
-    marginTop: 20,
-  },
   pickerContainer: {
     width: '90%',
     borderWidth: 1,
@@ -168,5 +187,12 @@ const styles = StyleSheet.create({
   picker: {
     width: '100%',
     height: 50,
+  },
+  buttonContainer: {
+    width: '90%',
+    marginTop: 20,
+  },
+  loadingIndicator: {
+    marginTop: 20,
   },
 });

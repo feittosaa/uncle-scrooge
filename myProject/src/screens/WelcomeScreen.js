@@ -1,23 +1,25 @@
-import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
+import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 
 export default function WelcomeScreen({ navigation }) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Bem-vindo!</Text>
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Login"
-          onPress={() => navigation.navigate('Login')}
-        />
+    <KeyboardAvoidingWrapper>
+      <View style={styles.container}>
+        <Text style={styles.title}>Bem-vindo!</Text>
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Login"
+            onPress={() => navigation.navigate('Login')}
+          />
+        </View>
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Registrar"
+            onPress={() => navigation.navigate('Register')}
+          />
+        </View>
       </View>
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Registrar"
-          onPress={() => navigation.navigate('Register')}
-        />
-      </View>
-    </View>
+    </KeyboardAvoidingWrapper>
   );
 }
 
