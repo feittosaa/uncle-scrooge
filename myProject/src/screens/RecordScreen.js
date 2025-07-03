@@ -4,31 +4,36 @@ import { useState } from 'react';
 import { ActivityIndicator, Alert, Button, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { insertAccountRecord } from '../database/database';
 
-export const categories = ['Alimentação', 'Saúde', 'Transporte', 'Lazer', 'Outros'];
+const gastoCategories = ['Alimentação', 'Saúde', 'Transporte', 'Lazer', 'Outros'];
+const receitaCategories = ['Salário', 'Renda Extra', 'Outros'];
 
 export default function RecordScreen() {
   const route = useRoute();
   const userId = route.params?.userId;
 
-  const [quantiaGasta, setQuantiaGasta] = useState('');
+  const [quantia, setQuantia] = useState('');
   const [nomeConta, setNomeConta] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [tipo, setTipo] = useState('gasto'); // gasto ou receita
+  const [categoria, setCategoria] = useState('');
   const [data, setData] = useState(new Date().toISOString().split('T')[0]);
   const [loading, setLoading] = useState(false);
+
+  const categorias = tipo === 'gasto' ? gastoCategories : receitaCategories;
 
   const handleRecord = async () => {
     if (!userId) {
       Alert.alert("Erro", "ID do usuário não encontrado. Por favor, faça login novamente.");
       return;
     }
-    if (!quantiaGasta || !nomeConta || selectedCategories.length === 0 || selectedCategories[0] === "") {
-      Alert.alert("Erro", "Por favor, preencha todos os campos e selecione uma categoria.");
+
+    if (!quantia || !nomeConta || !categoria) {
+      Alert.alert("Erro", "Por favor, preencha todos os campos.");
       return;
     }
 
-    const parsedQuantia = parseFloat(quantiaGasta.replace(',', '.'));
+    const parsedQuantia = parseFloat(quantia.replace(',', '.'));
     if (isNaN(parsedQuantia) || parsedQuantia <= 0) {
-      Alert.alert("Erro", "A quantia gasta deve ser um número válido e positivo.");
+      Alert.alert("Erro", "A quantia deve ser um número positivo.");
       return;
     }
 
@@ -38,28 +43,29 @@ export default function RecordScreen() {
       return;
     }
 
-    const categoriasString = selectedCategories[0];
+    const valorFinal = tipo === 'gasto' ? -parsedQuantia : parsedQuantia;
 
     setLoading(true);
     try {
       await insertAccountRecord(
         userId,
-        parsedQuantia,
+        valorFinal,
         nomeConta,
-        categoriasString,
+        categoria,
         data
       );
 
-      Alert.alert("Sucesso", "Conta registrada com sucesso!");
+      Alert.alert("Sucesso", "Registro adicionado com sucesso!");
 
       // Limpar campos
-      setQuantiaGasta('');
+      setQuantia('');
       setNomeConta('');
-      setSelectedCategories([]);
+      setCategoria('');
+      setTipo('gasto');
       setData(new Date().toISOString().split('T')[0]);
     } catch (error) {
-      console.error("Erro ao registrar conta:", error);
-      Alert.alert("Erro", "Ocorreu um erro ao registrar a conta. Tente novamente.");
+      console.error("Erro ao registrar:", error);
+      Alert.alert("Erro", "Não foi possível registrar. Tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -67,21 +73,36 @@ export default function RecordScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Registrar Nova Conta</Text>
+      <Text style={styles.title}>Registrar Receita/Gasto</Text>
 
-      <Text style={styles.label}>Quantia Gasta:</Text>
+      <Text style={styles.label}>Tipo:</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={tipo}
+          onValueChange={(value) => {
+            setTipo(value);
+            setCategoria('');
+          }}
+          style={styles.picker}
+        >
+          <Picker.Item label="Gasto" value="gasto" />
+          <Picker.Item label="Receita" value="receita" />
+        </Picker>
+      </View>
+
+      <Text style={styles.label}>Quantia:</Text>
       <TextInput
         style={styles.input}
         placeholder="Ex: 150.75"
         keyboardType="numeric"
-        value={quantiaGasta}
-        onChangeText={setQuantiaGasta}
+        value={quantia}
+        onChangeText={setQuantia}
       />
 
       <Text style={styles.label}>Nome/Descrição:</Text>
       <TextInput
         style={styles.input}
-        placeholder="Ex: Aluguel, Supermercado, Cinema"
+        placeholder="Ex: Salário, Aluguel, Supermercado"
         value={nomeConta}
         onChangeText={setNomeConta}
       />
@@ -89,11 +110,12 @@ export default function RecordScreen() {
       <Text style={styles.label}>Categoria:</Text>
       <View style={styles.pickerContainer}>
         <Picker
-          selectedValue={selectedCategories[0] || ""}
-          onValueChange={(itemValue) => setSelectedCategories([itemValue])}
+          selectedValue={categoria}
+          onValueChange={(value) => setCategoria(value)}
           style={styles.picker}
         >
-          {categories.map((cat) => (
+          <Picker.Item label="Selecione uma categoria..." value="" />
+          {categorias.map((cat) => (
             <Picker.Item key={cat} label={cat} value={cat} />
           ))}
         </Picker>
@@ -109,11 +131,12 @@ export default function RecordScreen() {
 
       <View style={styles.buttonContainer}>
         <Button
-          title={loading ? "Registrando..." : "Registrar Conta"}
+          title={loading ? "Registrando..." : "Registrar"}
           onPress={handleRecord}
           disabled={loading}
         />
       </View>
+
       {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loadingIndicator} />}
     </ScrollView>
   );
@@ -150,13 +173,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     fontSize: 16,
   },
-  buttonContainer: {
-    width: '90%',
-    marginTop: 20,
-  },
-  loadingIndicator: {
-    marginTop: 20,
-  },
   pickerContainer: {
     width: '90%',
     borderWidth: 1,
@@ -168,5 +184,12 @@ const styles = StyleSheet.create({
   picker: {
     width: '100%',
     height: 50,
+  },
+  buttonContainer: {
+    width: '90%',
+    marginTop: 20,
+  },
+  loadingIndicator: {
+    marginTop: 20,
   },
 });
