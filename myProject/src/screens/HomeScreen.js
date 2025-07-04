@@ -147,20 +147,23 @@ export default function HomeScreen({ navigation, route }) {
 
         {/* KPIs por categoria */}
         {categorias.length > 0 && (
-          <View style={styles.kpiContainer}>
-            {categorias.map((categoria, index) => {
-              const gasto = valoresGastos[index];
-              const meta = metaPorCategoria[categoria] || 0;
-              const dentroMeta = gasto <= meta;
+          <>
+            <Text style={styles.graphTitleRecords}>Metas</Text>
+            <View style={styles.kpiContainer}>
+              {categorias.map((categoria, index) => {
+                const gasto = valoresGastos[index];
+                const meta = metaPorCategoria[categoria] || 0;
+                const dentroMeta = gasto <= meta;
 
-              return (
-                <View key={categoria} style={[styles.kpiBoxCategory, { backgroundColor: dentroMeta ? '#0fcf0f' : '#ffdf00' }]}>
-                  <Text style={styles.kpiLabelCategory}>{categoria}</Text>
-                  <Text style={styles.kpiValueCategory}>R$ {gasto.toFixed(2)}</Text>
-                </View>
-              );
-            })}
-          </View>
+                return (
+                  <View key={categoria} style={[styles.kpiBoxCategory, { backgroundColor: dentroMeta ? '#0fcf0f' : '#ffdf00' }]}>
+                    <Text style={styles.kpiLabelCategory}>{categoria}</Text>
+                    <Text style={styles.kpiValueCategory}>R$ {meta.toFixed(2)}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          </>
         )}
 
         {/* Botões de ação */}
@@ -198,14 +201,15 @@ const styles = StyleSheet.create({
   welcomeText: { fontSize: 18, fontWeight: 'bold', color: '#2c3e50' },
   logoutButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#e74c3c', padding: 6, paddingHorizontal: 12, borderRadius: 25 },
   logoutButtonText: { color: '#fff', marginLeft: 5, fontSize: 16 },
-  kpiContainer: { flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: 20, flexWrap: 'wrap' },
+  kpiContainer: { flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: 15, flexWrap: 'wrap' },
   kpiBox: { width: 100, height: 100, backgroundColor: '#ecf0f1', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   kpiBoxCategory: { width: 80, height: 60, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   kpiLabel: { fontSize: 16, fontWeight: 'bold', color: '#2c3e50', marginBottom: 5 },
   kpiLabelCategory: { fontSize: 12, fontWeight: 'bold', color: '#2c3e50', marginBottom: 5 },
   kpiValue: { fontSize: 14, color: '#34495e' },
   kpiValueCategory: { fontSize: 14, color: '#34495e' },
-  graphTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10, marginTop: 20, color: '#2c3e50' },
+  graphTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10, marginTop: 10, color: '#2c3e50' },
+  graphTitleRecords: { fontSize: 16, fontWeight: 'bold', marginBottom: 0, marginTop: 10, color: '#2c3e50' },
   chart: { borderRadius: 12 },
   mainButtonsContainer: { marginTop: 30, flexDirection: 'row', justifyContent: 'space-around', flexWrap: 'wrap', gap: 20 },
   actionButton: { backgroundColor: '#60afdf', width: 100, height: 100, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
