@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { Alert, Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { BarChart, LineChart } from 'react-native-chart-kit';
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
@@ -9,80 +10,77 @@ const screenWidth = Dimensions.get('window').width;
 
 export default function HomeScreen({ navigation, route }) {
   const nome = route.params?.nome || 'Usuário';
-  const email = route.params?.email || 'N/A';
   const userId = route.params?.userId;
 
   const [resumo, setResumo] = useState({ receita: 0, gasto: 0 });
   const [lineData, setLineData] = useState({ labels: [], datasets: [] });
   const [barData, setBarData] = useState({ labels: [], datasets: [] });
   const [metaPorCategoria, setMetaPorCategoria] = useState({});
-
   const [categorias, setCategorias] = useState([]);
   const [valoresGastos, setValoresGastos] = useState([]);
   const [coresBarras, setCoresBarras] = useState([]);
 
   const saldo = resumo.receita - resumo.gasto;
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const records = await getAllAccountRecordsByUserId(userId);
-      const metas = await getGoalsByUserId(userId);
-      setMetaPorCategoria(metas);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        const records = await getAllAccountRecordsByUserId(userId);
+        const metas = await getGoalsByUserId(userId);
+        setMetaPorCategoria(metas);
 
-      let receita = 0, gasto = 0;
-      const evolucaoMap = {};
-      const gastoPorCategoria = {};
+        let receita = 0, gasto = 0;
+        const evolucaoMap = {};
+        const gastoPorCategoria = {};
 
-      for (const r of records) {
-        const data = r.data_registro;
-        const categoria = r.categoria || 'Outros';
+        for (const r of records) {
+          const data = r.data_registro;
+          const categoria = r.categoria || 'Outros';
 
-        if (!evolucaoMap[data]) evolucaoMap[data] = { receita: 0, gasto: 0 };
-        if (!gastoPorCategoria[categoria]) gastoPorCategoria[categoria] = 0;
+          if (!evolucaoMap[data]) evolucaoMap[data] = { receita: 0, gasto: 0 };
+          if (!gastoPorCategoria[categoria]) gastoPorCategoria[categoria] = 0;
 
-        if (r.quantia_gasta > 0) {
-          receita += r.quantia_gasta;
-          evolucaoMap[data].receita += r.quantia_gasta;
-        } else {
-          // Somente soma gastos (quantia negativa)
-          const absVal = Math.abs(r.quantia_gasta);
-          gasto += absVal;
-          evolucaoMap[data].gasto += absVal;
-          gastoPorCategoria[categoria] += absVal;
+          if (r.quantia_gasta > 0) {
+            receita += r.quantia_gasta;
+            evolucaoMap[data].receita += r.quantia_gasta;
+          } else {
+            const absVal = Math.abs(r.quantia_gasta);
+            gasto += absVal;
+            evolucaoMap[data].gasto += absVal;
+            gastoPorCategoria[categoria] += absVal;
+          }
         }
-      }
 
-      setResumo({ receita, gasto });
+        setResumo({ receita, gasto });
 
-      const datasOrdenadas = Object.keys(evolucaoMap).sort();
-      setLineData({
-        labels: datasOrdenadas.map(d => d.slice(5)),
-        datasets: [
-          { data: datasOrdenadas.map(d => evolucaoMap[d].receita), color: () => '#27ae60', strokeWidth: 2 },
-          { data: datasOrdenadas.map(d => evolucaoMap[d].gasto), color: () => '#e74c3c', strokeWidth: 2 },
-        ]
-      });
+        const datasOrdenadas = Object.keys(evolucaoMap).sort();
+        setLineData({
+          labels: datasOrdenadas.map(d => d.slice(5)),
+          datasets: [
+            { data: datasOrdenadas.map(d => evolucaoMap[d].receita), color: () => '#27ae60', strokeWidth: 2 },
+            { data: datasOrdenadas.map(d => evolucaoMap[d].gasto), color: () => '#e74c3c', strokeWidth: 2 },
+          ]
+        });
 
-      // Agora, só categorias com gastos
-      const categoriasOrdenadas = Object.keys(gastoPorCategoria).filter(cat => gastoPorCategoria[cat] > 0).sort();
-      const valores = categoriasOrdenadas.map(cat => gastoPorCategoria[cat]);
-      const cores = categoriasOrdenadas.map(cat =>
-        gastoPorCategoria[cat] > (metas[cat] || 0) ? '#f1c40f' : '#27ae60' // amarelo se acima, verde se dentro
-      );
+        const categoriasOrdenadas = Object.keys(gastoPorCategoria).filter(cat => gastoPorCategoria[cat] > 0).sort();
+        const valores = categoriasOrdenadas.map(cat => gastoPorCategoria[cat]);
+        const cores = categoriasOrdenadas.map(cat =>
+          gastoPorCategoria[cat] > (metas[cat] || 0) ? '#f1c40f' : '#27ae60'
+        );
 
-      setCategorias(categoriasOrdenadas);
-      setValoresGastos(valores);
-      setCoresBarras(cores);
+        setCategorias(categoriasOrdenadas);
+        setValoresGastos(valores);
+        setCoresBarras(cores);
 
-      // Também atualiza o barData para as labels e datasets
-      setBarData({
-        labels: categoriasOrdenadas,
-        datasets: [{ data: valores }],
-      });
-    };
+        setBarData({
+          labels: categoriasOrdenadas,
+          datasets: [{ data: valores }],
+        });
+      };
 
-    fetchData();
-  }, []);
+      fetchData();
+    }, [userId])
+  );
 
   return (
     <KeyboardAvoidingWrapper>
@@ -101,14 +99,14 @@ export default function HomeScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
 
-        {/* KPIs */}
+        {/* KPIs principais */}
         <View style={styles.kpiContainer}>
           <View style={styles.kpiBox}><Text style={styles.kpiLabel}>Receitas</Text><Text style={styles.kpiValue}>R$ {resumo.receita.toFixed(2)}</Text></View>
           <View style={styles.kpiBox}><Text style={styles.kpiLabel}>Gastos</Text><Text style={styles.kpiValue}>R$ {resumo.gasto.toFixed(2)}</Text></View>
           <View style={styles.kpiBox}><Text style={styles.kpiLabel}>Saldo</Text><Text style={[styles.kpiValue, { color: saldo >= 0 ? 'green' : 'red' }]}>R$ {saldo.toFixed(2)}</Text></View>
         </View>
 
-        {/* Line Chart */}
+        {/* Gráfico de linha */}
         {lineData.labels.length > 0 && (
           <>
             <Text style={styles.graphTitle}>Evolução Financeira</Text>
@@ -123,7 +121,7 @@ export default function HomeScreen({ navigation, route }) {
           </>
         )}
 
-        {/* Bar Chart */}
+        {/* Gráfico de barras */}
         {barData.labels.length > 0 && (
           <>
             <Text style={styles.graphTitle}>Gastos por Categoria</Text>
@@ -136,9 +134,10 @@ export default function HomeScreen({ navigation, route }) {
               height={180}
               fromZero
               showValuesOnTopOfBars
+              withInnerLines={false}
               chartConfig={{
                 ...chartConfig,
-                color: (opacity = 1, index) => coresBarras[index % coresBarras.length], // <- aqui aplicamos a cor correta
+                color: (opacity = 1, index) => coresBarras[index % coresBarras.length],
                 barPercentage: 0.6,
               }}
               style={styles.chart}
@@ -146,11 +145,11 @@ export default function HomeScreen({ navigation, route }) {
           </>
         )}
 
-        {/* KPIs por Categoria */}
-        {barData.labels.length > 0 && (
+        {/* KPIs por categoria */}
+        {categorias.length > 0 && (
           <View style={styles.kpiContainer}>
-            {barData.labels.map((categoria, index) => {
-              const gasto = barData.datasets[0].data[index];
+            {categorias.map((categoria, index) => {
+              const gasto = valoresGastos[index];
               const meta = metaPorCategoria[categoria] || 0;
               const dentroMeta = gasto <= meta;
 
@@ -164,7 +163,7 @@ export default function HomeScreen({ navigation, route }) {
           </View>
         )}
 
-        {/* Botões */}
+        {/* Botões de ação */}
         <View style={styles.mainButtonsContainer}>
           <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('Record', { userId })}>
             <Ionicons name="add-circle-outline" size={40} color="#fff" />
@@ -195,13 +194,13 @@ const chartConfig = {
 
 const styles = StyleSheet.create({
   container: { paddingTop: 30, paddingHorizontal: 20, backgroundColor: '#f5f5f5' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 0 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   welcomeText: { fontSize: 18, fontWeight: 'bold', color: '#2c3e50' },
-  logoutButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#e74c3c', padding: 2, paddingHorizontal: 12, borderRadius: 25 },
+  logoutButton: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#e74c3c', padding: 6, paddingHorizontal: 12, borderRadius: 25 },
   logoutButtonText: { color: '#fff', marginLeft: 5, fontSize: 16 },
   kpiContainer: { flexDirection: 'row', justifyContent: 'space-between', gap: 10, marginTop: 20, flexWrap: 'wrap' },
   kpiBox: { width: 100, height: 100, backgroundColor: '#ecf0f1', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  kpiBoxCategory: { width: 80, height: 60, backgroundColor: '#ecf0f1', borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  kpiBoxCategory: { width: 80, height: 60, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
   kpiLabel: { fontSize: 16, fontWeight: 'bold', color: '#2c3e50', marginBottom: 5 },
   kpiLabelCategory: { fontSize: 12, fontWeight: 'bold', color: '#2c3e50', marginBottom: 5 },
   kpiValue: { fontSize: 14, color: '#34495e' },
