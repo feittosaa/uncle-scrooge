@@ -2,7 +2,7 @@ import { Picker } from '@react-native-picker/picker';
 import { useRoute } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { Alert, Button, FlatList, StyleSheet, Text, TextInput, View } from 'react-native';
-import { deleteGoal, getGoalsByUserId, insertGoal, updateGoal } from '../database/database';
+import { deleteGoal, getGoalsByUserIdArray, insertGoal, updateGoal } from '../database/database';
 
 export default function GoalScreen() {
   const route = useRoute();
@@ -17,7 +17,7 @@ export default function GoalScreen() {
 
   const loadGoals = async () => {
     try {
-      const data = await getGoalsByUserId(userId);
+      const data = await getGoalsByUserIdArray(userId);
       setGoals(data);
     } catch (error) {
       console.error('Erro ao carregar metas:', error);
@@ -31,6 +31,15 @@ export default function GoalScreen() {
   const handleSave = async () => {
     if (!categoria || !valorMeta) {
       Alert.alert('Erro', 'Preencha todos os campos.');
+      return;
+    }
+
+    const categoriaExistente = goals.find(
+      (g) => g.categoria === categoria && (!editingGoal || g.id !== editingGoal.id)
+    );
+
+    if (categoriaExistente && !editingGoal) {
+      Alert.alert('Erro', 'Já existe uma meta para essa categoria.');
       return;
     }
 
@@ -97,9 +106,11 @@ export default function GoalScreen() {
           onValueChange={(value) => setCategoria(value)}
         >
           <Picker.Item label="Selecione uma categoria" value="" />
-          {categories.map((cat) => (
-            <Picker.Item key={cat} label={cat} value={cat} />
-          ))}
+          {categories
+            .filter((cat) => !goals.some((g) => g.categoria === cat))
+            .map((cat) => (
+              <Picker.Item key={cat} label={cat} value={cat} />
+            ))}
         </Picker>
       </View>
 
