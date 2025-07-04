@@ -180,12 +180,30 @@ export const insertGoal = async (userId, categoria, valorMeta) => {
   );
 };
 
-export const getGoalsByUserId = async (userId) => {
+export const getGoalsByUserIdArray = async (userId) => {
   if (!db) throw new Error('Banco de dados não inicializado.');
-  return db.getAllAsync(
-    'SELECT * FROM goals WHERE user_id = ?;',
+
+  const rows = await db.getAllAsync(
+    'SELECT id, categoria, valor_meta FROM goals WHERE user_id = ?;',
     [userId]
   );
+
+  return rows;
+};
+
+export const getGoalsByUserId = async (userId) => {
+  if (!db) throw new Error('Banco de dados não inicializado.');
+  const rows = await db.getAllAsync(
+    'SELECT categoria, valor_meta FROM goals WHERE user_id = ?;',
+    [userId]
+  );
+
+  const metasPorCategoria = {};
+  for (const row of rows) {
+    metasPorCategoria[row.categoria] = row.valor_meta;
+  }
+
+  return metasPorCategoria;
 };
 
 export const updateGoal = async (id, categoria, valorMeta) => {
